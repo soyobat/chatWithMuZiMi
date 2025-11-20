@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Message, Sender, Session } from './types';
-import { initializeMutsumiChat, sendMessageToMutsumi, resetChatSession, restoreChatSession } from './services/gemini';
+import { initializeMutsumiChat, sendMessageToMutsumi, resetChatSession, restoreChatSession, initializeApiClient } from './services/gemini';
+import { storageUtils } from './src/utils/storage';
+import Settings from './src/components/Settings';
 
 // --- Constants ---
 const STORAGE_KEY = 'mutsumi_chat_sessions';
@@ -684,9 +686,55 @@ const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(false); 
+  const [showSidebar, setShowSidebar] = useState(false);
   const [customAvatar, setCustomAvatar] = useState<string | null>(null);
   const [mutsumiAvatar, setMutsumiAvatar] = useState<string | null>(null);
+  
+  // Settings State
+  const [showSettings, setShowSettings] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
+
+  // Check for API key on component mount
+  useEffect(() => {
+    const checkApiKey = () => {
+      const hasKey = storageUtils.hasApiKey();
+      setHasApiKey(hasKey);
+      if (!hasKey) {
+        setShowSettings(true);
+      }
+    };
+    checkApiKey();
+  }, []);
+
+  // Handle API key update from settings
+  const handleApiKeyUpdate = async (newApiKey: string) => {
+    try {
+      storageUtils.setApiKey(newApiKey);
+      setHasApiKey(true);
+      setShowSettings(false);
+      
+      // Initialize the API client with the new key
+      await initializeApiClient(newApiKey);
+      
+      // Add a welcome message if this is the first time
+      if (!hasApiKey) {
+        setMessages([{
+          id: 'welcome',
+          text: '……欢迎回来。',
+          sender: Sender.MUTSUMI,
+          timestamp: new Date()
+        }]);
+      }
+    } catch (error) {
+      console.error('Failed to update API key:', error);
+      // Keep settings open if there's an error
+    }
+  };
+
+  // Toggle settings
+  const toggleSettings = () => {
+    setShowSettings(!showSettings);
+  };
   
   // Image Upload State
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -960,6 +1008,13 @@ const App: React.FC = () => {
                <span className="text-[9px] text-mutsumi-dim font-mono tracking-widest opacity-60">
                    CONNECTED
                </span>
+               <button
+                 onClick={toggleSettings}
+                 className="ml-2 p-1.5 rounded-full bg-mutsumi-surface/30 border border-mutsumi-border/30 text-mutsumi-dim hover:text-mutsumi-glow hover:border-mutsumi-glow/30 hover:bg-mutsumi-surface/50 transition-all"
+                 title="设置"
+               >
+                 <span className="text-lg">⚙️</span>
+               </button>
             </div>
         </div>
 
@@ -1070,6 +1125,15 @@ const App: React.FC = () => {
             </div>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <Settings
+          isOpen={showSettings}
+          onApiKeyUpdate={handleApiKeyUpdate}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
     </div>
   );
 };

@@ -1,17 +1,53 @@
 import { GoogleGenAI, Chat, GenerateContentResponse, Content } from "@google/genai";
 import { Message, Sender } from "../types";
+import { storageUtils } from "../src/utils/storage.ts";
 
-// Initialize API client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
+// API client instance
+let ai: GoogleGenAI | null = null;
 let chatSession: Chat | null = null;
 
+// Initialize API client with API key
+export const initializeApiClient = (apiKey: string): void => {
+  if (!apiKey) {
+    throw new Error("API key is required");
+  }
+  ai = new GoogleGenAI({ apiKey });
+};
+
+// Get current API client
+const getApiClient = (): GoogleGenAI => {
+  if (!ai) {
+    // Try to get API key from storage
+    const storedApiKey = storageUtils.getApiKey();
+    if (storedApiKey) {
+      initializeApiClient(storedApiKey);
+    } else {
+      throw new Error("API client not initialized. Please provide an API key.");
+    }
+  }
+  return ai!;
+};
+
 /**
- * Initializes the chat session. 
- * Uses a hardcoded persona for maximum speed and reliability.
+ * Initializes the chat session with optional API key
  */
-export const initializeMutsumiChat = async (historyMessages: Message[] = []): Promise<string> => {
+export const initializeMutsumiChat = async (historyMessages: Message[] = [], apiKey?: string): Promise<string> => {
   try {
+    // If API key is provided, initialize or update the client
+    if (apiKey) {
+      if (!ai) {
+        initializeApiClient(apiKey);
+      }
+      // Save API key to storage
+      storageUtils.setApiKey(apiKey);
+    } else if (!ai) {
+      // If no API key is available, return offline message
+      return "离线协议已启动。";
+    }
+
+    // Get the API client
+    const client = getApiClient();
+    
     // Optimized System Instruction: Encourages verbose, detailed speech without actions.
     const systemInstruction = `
       你现在是 "若叶 睦" (Wakaba Mutsumi)。
@@ -56,19 +92,15 @@ export const initializeMutsumiChat = async (historyMessages: Message[] = []): Pr
       睦: ……在练习 Ave Mujica 的新曲子。7弦吉他稍微有点重……手指有些痛。
     `;
 
-    // Convert Message[] to Gemini Content[] history format
-    const historyContent: Content[] = historyMessages.map(m => {
-        const parts: any[] = [{ text: m.text }];
-        return {
-            role: m.sender === Sender.USER ? 'user' : 'model',
-            parts: parts
-        };
-    });
+    // Convert Message[] to Content[] history format
+    const historyContent: Content[] = historyMessages.map(m => ({
+        role: m.sender === Sender.USER ? 'user' : 'model',
+        parts: [{ text: m.text }]
+    }));
 
     // Initialize Chat Session
-    // Switched to gemini-2.5-flash for faster response times
-    chatSession = ai.chats.create({
-      model: "gemini-2.5-flash", 
+    chatSession = client.chats.create({
+      model: "gemini-2.5-flash",
       history: historyContent,
       config: {
         systemInstruction: systemInstruction,
@@ -86,24 +118,35 @@ export const initializeMutsumiChat = async (historyMessages: Message[] = []): Pr
 /**
  * Resets the chat session (useful for "New Chat")
  */
-export const resetChatSession = async () => {
-    await initializeMutsumiChat([]);
+export const resetChatSession = async (): Promise<void> => {
+    chatSession = null;
 };
 
 /**
  * Restores a chat session from history
  */
-export const restoreChatSession = async (messages: Message[]) => {
+export const restoreChatSession = async (messages: Message[]): Promise<void> => {
     const validMessages = messages.filter(m => m.sender === Sender.USER || m.sender === Sender.MUTSUMI);
     await initializeMutsumiChat(validMessages);
 };
 
+/**
+ * Sends a message to Mutsumi
+ */
 export const sendMessageToMutsumi = async (userMessage: string, imageBase64?: string): Promise<Message> => {
   if (!chatSession) {
     await initializeMutsumiChat();
   }
 
-  if (!chatSession) throw new Error("Session failed");
+  if (!chatSession) {
+    // Return offline response if no session is available
+    return {
+      id: Date.now().toString(),
+      text: "……（离线状态，无法回复）",
+      sender: Sender.MUTSUMI,
+      timestamp: new Date(),
+    };
+  }
 
   try {
     let messagePayload: any = userMessage;
@@ -144,7 +187,7 @@ export const sendMessageToMutsumi = async (userMessage: string, imageBase64?: st
     console.error("Error sending message:", error);
     return {
       id: Date.now().toString(),
-      text: "……",
+      text: "……（网络错误，无法回复）",
       sender: Sender.MUTSUMI,
       timestamp: new Date(),
     };
