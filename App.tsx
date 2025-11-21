@@ -3,6 +3,14 @@ import { Message, Sender, Session } from './types';
 import { initializeMutsumiChat, sendMessageToMutsumi, resetChatSession, restoreChatSession, initializeApiClient } from './services/gemini';
 import { storageUtils } from './src/utils/storage';
 import Settings from './src/components/Settings';
+import {
+  isMobile,
+  initializeMobileFeatures,
+  triggerHapticFeedback,
+  takePicture,
+  selectImage,
+  compressImageForMobile
+} from './src/utils/mobile';
 
 // --- Constants ---
 const STORAGE_KEY = 'mutsumi_chat_sessions';
@@ -11,6 +19,47 @@ const CHARACTER_AVATAR_STORAGE_KEY = 'mutsumi_character_avatar';
 
 // --- Utilities ---
 const compressImage = (file: File, maxWidth = 600, quality = 0.6): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxWidth) {
+            width *= maxWidth / height;
+            height = maxWidth;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+        } else {
+            reject(new Error("Canvas context failed"));
+        }
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+};
+
+// 移动端优化的图片压缩
+const getCompressImage = (file: File, maxWidth = 600, quality = 0.6): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -347,8 +396,13 @@ const SidebarProfile = ({
     return () => clearInterval(timer);
   }, []);
 
-  const handleInteraction = (type: 'water' | 'poke' | 'pick' | 'music' | 'stare') => {
+  const handleInteraction = async (type: 'water' | 'poke' | 'pick' | 'music' | 'stare') => {
     setStatusLocked(true);
+    
+    // 移动端触觉反馈
+    if (isMobile()) {
+      await triggerHapticFeedback();
+    }
     
     if (type === 'water') {
         if (cucumberProgress >= 100) {
@@ -362,7 +416,7 @@ const SidebarProfile = ({
         } else {
             setCucumberProgress(prev => Math.min(100, prev + 15));
             const now = Date.now();
-            setWaterDrops(prev => prev.map(d => d)); 
+            setWaterDrops(prev => prev.map(d => d));
             setWaterDrops(prev => [...prev, now, now + 1, now + 2]);
             setTimeout(() => setWaterDrops(prev => prev.filter(d => d < now)), 700);
             setStatus("……黄瓜喝水了。");
@@ -824,6 +878,11 @@ const App: React.FC = () => {
   useEffect(() => {
     const init = async () => {
         await initializeMutsumiChat();
+        
+        // 移动端初始化
+        if (isMobile()) {
+            await initializeMobileFeatures();
+        }
     };
     init();
   }, []);
@@ -928,8 +987,9 @@ const App: React.FC = () => {
       if (!file) return;
       
       try {
-          // Compress before setting to state to save memory/quota
-          const compressed = await compressImage(file, 800, 0.7);
+          // 移动端使用优化的压缩函数
+          const compressFunction = isMobile() ? compressImageForMobile : compressImage;
+          const compressed = await compressFunction(file, 800, 0.7);
           setSelectedImage(compressed);
       } catch (err) {
           console.error("Failed to compress image", err);
