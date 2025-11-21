@@ -1,11 +1,29 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-const config: CapacitorConfig = {
+const config: {
+  server: { androidScheme: string };
+  webDir: string;
+  appName: string;
+  plugins: {
+    Keyboard: { resize: string; style: string };
+    SplashScreen: {
+      launchAutoHide: boolean;
+      backgroundColor: string;
+      androidSplashResourceName: string;
+      launchShowDuration: number;
+      showSpinner: boolean;
+      spinnerColor: string
+    };
+    Haptics: { selectionStart: boolean; selectionChanged: boolean; selectionEnd: boolean };
+    StatusBar: { backgroundColor: string; style: string }
+  };
+  appId: string
+} = {
   appId: 'com.mutsumi.chat',
   appName: 'ChatWithMuZiMi',
   webDir: 'dist',
   server: {
-    androidScheme: 'https'
+    androidScheme: 'https',
   },
   plugins: {
     SplashScreen: {
@@ -13,15 +31,8 @@ const config: CapacitorConfig = {
       launchAutoHide: true,
       backgroundColor: "#202624",
       androidSplashResourceName: "splash",
-      androidScaleType: "CENTER_CROP",
       showSpinner: true,
-      androidSpinnerStyle: "large",
-      iosSpinnerStyle: "small",
       spinnerColor: "#6b9c8a",
-      splashFullScreen: true,
-      splashImmersive: true,
-      layoutName: "launch_screen",
-      useDialog: true,
     },
     StatusBar: {
       style: "dark",
@@ -29,15 +40,14 @@ const config: CapacitorConfig = {
     },
     Keyboard: {
       style: "dark",
-      style: "DARK",
       resize: "body",
     },
     Haptics: {
       selectionStart: true,
       selectionChanged: true,
       selectionEnd: true,
-    }
-  }
+    },
+  },
 };
 
 export default config;

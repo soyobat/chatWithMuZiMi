@@ -202,6 +202,12 @@ const Icons = {
     <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
     </svg>
+  ),
+  Settings: () => (
+    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.065 2.572c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.572-1.065c-1.543.94-2.37-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.065-2.572c-.94-1.543.826-3.31 2.37-2.37.93.426 2.147.817 2.572 1.065z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
   )
 };
 
@@ -548,8 +554,8 @@ const SidebarProfile = ({
 
       {/* Mutsumi Profile Header */}
       <div className="flex flex-col items-center text-center pt-2">
-        <div 
-            className="w-32 h-32 rounded-full border border-mutsumi-border/30 p-1 relative group cursor-pointer bg-mutsumi-surface/30 shadow-lg backdrop-blur-sm"
+        <div
+            className="w-24 h-24 md:w-32 md:h-32 rounded-full border border-mutsumi-border/30 p-1 relative group cursor-pointer bg-mutsumi-surface/30 shadow-lg backdrop-blur-sm"
             onClick={() => mutsumiFileInputRef.current?.click()}
             title="点击更换若叶睦头像"
         >
@@ -558,7 +564,7 @@ const SidebarProfile = ({
                {mutsumiAvatar ? (
                    <img src={mutsumiAvatar} alt="Mutsumi" className="w-full h-full object-cover" />
                ) : (
-                   <span className="font-serif text-4xl text-mutsumi-glow/50 tracking-widest opacity-90">WM</span>
+                   <span className="font-serif text-2xl md:text-4xl text-mutsumi-glow/50 tracking-widest opacity-90">WM</span>
                )}
                {/* Upload Overlay */}
                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-mutsumi-text">
@@ -567,51 +573,51 @@ const SidebarProfile = ({
           </div>
         </div>
 
-        <h2 className="mt-4 font-serif text-xl tracking-wider text-mutsumi-text font-semibold opacity-90">若叶 睦</h2>
-        <p className="text-[10px] text-mutsumi-dim tracking-[0.3em] uppercase mt-1">Wakaba Mutsumi</p>
+        <h2 className="mt-3 md:mt-4 font-serif text-lg md:text-xl tracking-wider text-mutsumi-text font-semibold opacity-90">若叶 睦</h2>
+        <p className="text-[9px] md:text-[10px] text-mutsumi-dim tracking-[0.3em] uppercase mt-1">Wakaba Mutsumi</p>
         
         {/* Status Card */}
-        <div className="mt-4 w-full px-4 py-3 bg-mutsumi-surface/20 backdrop-blur-md border border-mutsumi-border/30 rounded-lg shadow-sm relative overflow-hidden">
-            <div className="flex items-center justify-center text-center min-h-[1.5rem]">
-                <span className="text-xs font-serif text-mutsumi-text/80 tracking-wide animate-fade-in italic">
+        <div className="mt-3 md:mt-4 w-full px-3 md:px-4 py-2.5 md:py-3 bg-mutsumi-surface/20 backdrop-blur-md border border-mutsumi-border/30 rounded-lg shadow-sm relative overflow-hidden">
+            <div className="flex items-center justify-center text-center min-h-[1.25rem] md:min-h-[1.5rem]">
+                <span className="text-[10px] md:text-xs font-serif text-mutsumi-text/80 tracking-wide animate-fade-in italic">
                     "{status}"
                 </span>
             </div>
         </div>
 
         {/* Interaction Grid */}
-        <div className="grid grid-cols-2 gap-2 mt-5 w-full">
-            <button 
+        <div className="grid grid-cols-2 gap-1.5 md:gap-2 mt-3 md:mt-5 w-full">
+            <button
                 onClick={() => handleInteraction('poke')}
-                className="group p-2 rounded-lg bg-mutsumi-surface/30 border border-mutsumi-border/30 text-mutsumi-dim hover:text-mutsumi-glow hover:border-mutsumi-glow/30 hover:bg-mutsumi-surface/50 transition-all active:scale-95 flex flex-col items-center gap-1.5"
+                className="group p-1.5 md:p-2 rounded-lg bg-mutsumi-surface/30 border border-mutsumi-border/30 text-mutsumi-dim hover:text-mutsumi-glow hover:border-mutsumi-glow/30 hover:bg-mutsumi-surface/50 transition-all active:scale-95 flex flex-col items-center gap-1"
                 title="戳一戳"
             >
-                <Icons.Hand />
-                <span className="text-[9px] opacity-60 group-hover:opacity-100">戳一戳</span>
+                <Icons.Hand className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[8px] md:text-[9px] opacity-60 group-hover:opacity-100">戳一戳</span>
             </button>
-            <button 
+            <button
                 onClick={() => handleInteraction('pick')}
-                className="group p-2 rounded-lg bg-mutsumi-surface/30 border border-mutsumi-border/30 text-mutsumi-dim hover:text-mutsumi-glow hover:border-mutsumi-glow/30 hover:bg-mutsumi-surface/50 transition-all active:scale-95 flex flex-col items-center gap-1.5"
+                className="group p-1.5 md:p-2 rounded-lg bg-mutsumi-surface/30 border border-mutsumi-border/30 text-mutsumi-dim hover:text-mutsumi-glow hover:border-mutsumi-glow/30 hover:bg-mutsumi-surface/50 transition-all active:scale-95 flex flex-col items-center gap-1"
                 title="递吉他拨片"
             >
-                <Icons.Pick />
-                <span className="text-[9px] opacity-60 group-hover:opacity-100">送拨片</span>
+                <Icons.Pick className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[8px] md:text-[9px] opacity-60 group-hover:opacity-100">送拨片</span>
             </button>
-             <button 
+             <button
                 onClick={() => handleInteraction('music')}
-                className="group p-2 rounded-lg bg-mutsumi-surface/30 border border-mutsumi-border/30 text-mutsumi-dim hover:text-mutsumi-glow hover:border-mutsumi-glow/30 hover:bg-mutsumi-surface/50 transition-all active:scale-95 flex flex-col items-center gap-1.5"
+                className="group p-1.5 md:p-2 rounded-lg bg-mutsumi-surface/30 border border-mutsumi-border/30 text-mutsumi-dim hover:text-mutsumi-glow hover:border-mutsumi-glow/30 hover:bg-mutsumi-surface/50 transition-all active:scale-95 flex flex-col items-center gap-1"
                 title="一起听歌"
             >
-                <Icons.Headphones />
-                <span className="text-[9px] opacity-60 group-hover:opacity-100">一起听歌</span>
+                <Icons.Headphones className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[8px] md:text-[9px] opacity-60 group-hover:opacity-100">一起听歌</span>
             </button>
-             <button 
+             <button
                 onClick={() => handleInteraction('stare')}
-                className="group p-2 rounded-lg bg-mutsumi-surface/30 border border-mutsumi-border/30 text-mutsumi-dim hover:text-mutsumi-glow hover:border-mutsumi-glow/30 hover:bg-mutsumi-surface/50 transition-all active:scale-95 flex flex-col items-center gap-1.5"
+                className="group p-1.5 md:p-2 rounded-lg bg-mutsumi-surface/30 border border-mutsumi-border/30 text-mutsumi-dim hover:text-mutsumi-glow hover:border-mutsumi-glow/30 hover:bg-mutsumi-surface/50 transition-all active:scale-95 flex flex-col items-center gap-1"
                 title="注视"
             >
-                <Icons.Eye />
-                <span className="text-[9px] opacity-60 group-hover:opacity-100">注视</span>
+                <Icons.Eye className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[8px] md:text-[9px] opacity-60 group-hover:opacity-100">注视</span>
             </button>
         </div>
       </div>
@@ -1030,11 +1036,11 @@ const App: React.FC = () => {
 
       {/* Sidebar */}
       <div className={`
-        fixed md:relative w-72 h-full z-40 transition-transform duration-300 ease-out flex flex-col
+        fixed md:relative w-60 h-full z-40 transition-transform duration-300 ease-out flex flex-col
         bg-mutsumi-bg/50 backdrop-blur-xl border-r border-mutsumi-border/20
         ${showSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-5">
              <SidebarProfile 
                 onNewChat={handleNewChat} 
                 onAvatarUpdate={(url) => setCustomAvatar(url)}
@@ -1062,18 +1068,18 @@ const App: React.FC = () => {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col h-full relative z-10">
         {/* Header - Minimal */}
-        <div className="h-14 flex items-center justify-center md:justify-end px-6 bg-gradient-to-b from-mutsumi-bg/80 to-transparent pointer-events-none">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full pointer-events-auto">
+        <div className="h-16 flex items-center justify-end px-6 bg-gradient-to-b from-mutsumi-bg/80 to-transparent pointer-events-none">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full pointer-events-auto ">
                <div className="w-1 h-1 rounded-full bg-mutsumi-glow animate-pulse shadow-[0_0_8px_rgba(107,156,138,0.8)]"></div>
                <span className="text-[9px] text-mutsumi-dim font-mono tracking-widest opacity-60">
                    CONNECTED
                </span>
                <button
                  onClick={toggleSettings}
-                 className="ml-2 p-1.5 rounded-full bg-mutsumi-surface/30 border border-mutsumi-border/30 text-mutsumi-dim hover:text-mutsumi-glow hover:border-mutsumi-glow/30 hover:bg-mutsumi-surface/50 transition-all"
+                 className="ml-2 p-2.5 rounded-full bg-mutsumi-surface/30 border border-mutsumi-border/30 text-mutsumi-dim hover:text-mutsumi-glow hover:border-mutsumi-glow/30 hover:bg-mutsumi-surface/50 transition-all"
                  title="设置"
                >
-                 <span className="text-lg">⚙️</span>
+                   <Icons.Settings />
                </button>
             </div>
         </div>
